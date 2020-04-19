@@ -1,0 +1,119 @@
+; Vérifie si un nombre est bien paranthésé ( Le meme nombre de parathese ouvrante que fermante representé par des zero et 1) Ex: 0011 Zero = Paranthese ouvrante Un = Paranthese fermante
+
+
+
+
+DEFAULT REL
+; fonctions externes pour les entrees/sortie
+extern printf
+extern scanf
+segment .data  ; memoire globale donnees initialisees
+prompt       db "Entrez un entier en hexadecimal: ",0
+oui       db "BIEN parenthésée",10,0
+non       db "PAS BIEN bien parenthésée",10,0
+longHexFormat  db "%lx",0
+
+segment .bss  ; memoire globale donnees non itialisees
+hex  resq 1
+
+segment .text ; code du programme
+        global  main
+main:  ; fonction appelee par le programme C
+; sauvegarde des registres sur la pile
+	push rbp
+	push rbx
+	push rcx
+
+; appel printf
+	lea rdi,[prompt]
+        mov rax,0
+	call printf wrt ..plt
+; appel scanf
+        lea rdi,[longHexFormat]
+        lea rsi,[hex]
+        mov rax,0
+	call scanf wrt ..plt
+	mov rax,[hex]
+	
+;   intialisation of registers
+
+    mov rsi, 64      ;length counter
+    mov rdi, 1      ;mask
+    mov rdx, 1      ;last value of mask saved
+    
+;   checks first lower power bit
+    and rdi, rax
+    cmp rdi, rdx
+    jne _non         ;if first bit is 0 return non
+    jmp _counterinit   ;else jump to the 1 counter
+    
+_counterinit:
+    mov r8, 0      ;1 counter
+    mov r9, 0      ;0 counter
+    
+_1counter:
+    cmp rsi, 1
+    je _result
+    inc r8
+    dec rsi
+    shl rdx, 1
+    mov rdi, rdx
+    and rdi, rax
+    cmp rdi, rdx    ;checks the value of the current bit, if rdi and rdx is equal that means that it is a 1 
+    je _1counter
+    jmp _0counter
+    
+_0counter:
+    cmp rsi, 0
+    je _result
+    inc r9
+    dec rsi
+    shl rdx, 1
+    mov rdi, rdx
+    and rdi, rax
+    cmp rdi, rdx
+    jne _0counter
+    jmp _result
+    
+_result:
+    cmp r8, r9
+    je _finished?
+    jmp _non
+    
+_finished?:
+    cmp rsi, 0
+    je _oui
+    jmp _counterinit
+	
+	
+	
+; print non
+_non:
+; appel printf
+	lea rdi,[non]
+        mov rax,0
+	call printf wrt ..plt
+    
+    pop rcx
+    pop rbx
+	pop rbp
+	
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret
+
+        
+; print oui    
+_oui:
+; appel printf
+	lea rdi,[oui]
+        mov rax,0
+	call printf wrt ..plt
+	
+    pop rcx
+    pop rbx
+	pop rbp
+	
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret

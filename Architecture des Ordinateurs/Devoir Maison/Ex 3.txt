@@ -1,0 +1,54 @@
+; Determine si un nombre est pair ou impair
+
+
+
+
+
+DEFAULT REL
+; fonctions externes pour les entrees/sortie
+extern printf
+extern scanf
+
+segment .data  ; memoire globale donnees initialisees
+prompt       db "Saisir un entier signé n : ",0
+pair       db "pair",10,0
+impair       db "impair",10,0
+
+longIntFormat  db "%ld",0
+
+segment .bss  ; memoire globale donnees non itialisees
+entier  resq 1
+
+segment .text ; code du programme
+        global  main
+main:  ; fonction appelee par le programme C
+; sauvegarde des registres sur la pile
+	push rbp
+
+; appel printf
+	lea rdi,[prompt]
+        mov rax,0
+	call printf wrt ..plt
+; appel scanf
+        lea rdi,[longIntFormat]
+        lea rsi,[entier]
+        mov rax,0
+	call scanf wrt ..plt
+	mov rbx,[entier]
+
+    test bx, 1       ; test lower byte to determine if num is even or odd
+    jz even
+    
+	lea rdi,[impair]
+        mov rax,0
+	call printf wrt ..plt
+    
+	pop rbp
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret
+        
+even:
+	lea rdi,[pair]
+        mov rax,0
+	call printf wrt ..plt

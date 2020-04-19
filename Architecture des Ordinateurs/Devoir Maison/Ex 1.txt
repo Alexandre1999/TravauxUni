@@ -1,0 +1,99 @@
+; Calcul du résultat de OR,AND et XOR et affichage
+
+
+
+
+DEFAULT REL
+; fonctions externes pour les entrees/sortie
+extern printf
+extern scanf
+
+segment .data  ; memoire globale donnees initialisees
+prompt1       db "Entrez un entier : ",0
+prompt2       db "Entrez un deuxieme entier : ",0
+resultOR       db "a OR b est : %ld",10,0
+resultAND       db "a AND b est : %ld",10,0
+resultXOR       db "a XOR b est : %ld",10,0
+longIntFormat  db "%ld",0
+
+segment .bss  ; memoire globale donnees non itialisees
+entier1  resq 1
+entier2  resq 1
+result1 resq 1
+result2 resq 1
+result3 resq 1
+
+segment .text ; code du programme
+        global  main
+main:  ; fonction appelee par le programme C
+; sauvegarde des registres sur la pile
+	push rbp
+	push rbx
+	push r12
+	
+; appel printf
+	lea rdi,[prompt1]
+        mov rax,0
+	call printf wrt ..plt
+	
+; appel scanf
+        lea rdi,[longIntFormat]
+        lea rsi,[entier1]
+        mov rax,0
+	call scanf wrt ..plt
+	mov rbx,[entier1]
+
+	
+; appel printf
+        lea rdi,[prompt2]
+        mov rax,0
+	call printf wrt ..plt
+	
+; appel scanf
+        lea rdi,[longIntFormat]
+        lea rsi,[entier2]
+        mov rax,0
+	call scanf wrt ..plt
+	mov rcx,[entier2]
+	
+; calcul de OR et sauvegarde du resultat en memoire
+	or rbx,rcx
+	mov [result1],rbx
+
+; calcul de AND et sauvegarde du resultat en memoire
+    mov rbx, [entier1]
+    and rbx, rcx
+    mov [result2],rbx    
+
+; calcul de AND et sauvegarde du resultat en memoire
+    mov rbx, [entier1]
+    xor rbx,rcx
+    mov [result3],rbx    
+
+; appel printf
+	lea rdi,[resultOR]
+        mov rsi,[result1]
+        mov rax,0
+	call printf wrt ..plt
+	
+; appel printf
+	lea rdi,[resultAND]
+        mov rsi,[result2]
+        mov rax,0
+	call printf wrt ..plt
+	
+; appel printf
+	lea rdi,[resultXOR]
+        mov rsi,[result3]
+        mov rax,0
+	call printf wrt ..plt
+	
+
+; restauration des registres
+	pop r12
+	pop rbx
+	pop rbp
+	
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret

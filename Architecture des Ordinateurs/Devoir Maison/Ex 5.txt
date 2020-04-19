@@ -1,0 +1,131 @@
+; Verifie si il y a le meme nombre de zero et de uns.
+
+
+
+
+
+DEFAULT REL
+; fonctions externes pour les entrees/sortie
+extern printf
+extern scanf
+
+segment .data  ; memoire globale donnees initialisees
+prompt       db "Saisir un entier :",0
+oui       db "OUI",10,0
+non       db "NON",10,0
+
+longIntFormat  db "%ld",0
+
+segment .bss  ; memoire globale donnees non itialisees
+entier  resq 1
+
+segment .text ; code du programme
+        global  main
+main:  ; fonction appelee par le programme C
+
+; sauvegarde des registres sur la pile
+	push rbp	
+	push rbx
+	push rcx
+	
+; print message inviting user input
+	lea rdi,[prompt]
+        mov rax, 0
+	call printf wrt ..plt
+; assignment of user input to variable
+        lea rdi,[longIntFormat]
+        lea rsi,[entier]
+        mov rax, 0
+	call scanf wrt ..plt
+	mov rax,[entier]
+	
+;   intialisation of registers
+
+    mov r8, 0      ;0 counter
+    mov r9, 0      ;1 counter
+    mov rsi, 0      ;length counter
+    mov rdi, 1      ;mask
+    mov rdx, 1      ;last value of mask saved 
+    
+;   checks first lower power bit
+    and rdi, rax
+    cmp rdi, rdx
+    je _non         ;if first bit is 1 return NON
+    jmp _0counter   ;else jump to the zero counter
+    
+_0counter:
+    shl rdx, 1      ;shifts mask to the left
+    mov rdi, rdx    ;restore new value of mask
+    inc r8          ;inc. 0 counter    
+    and rdi, rax
+    cmp rdi, rdx
+    jne _0counter
+    jmp _1counter
+    
+_1counter:
+    inc r9          ;inc. 1 counter
+    shl rdx, 1         ;shifts mask to the left
+    mov rdi, rdx    ;restore new value of the mask
+    and rdi, rax
+    cmp rdi, rdx
+    je _1counter
+    jmp _0countstart
+    
+_0countstart:
+;   initialise the number of times to repeat the highest power 0 counter
+    mov r10, r9
+    add r10, r8     ;number of numbers done yet
+    mov r11, 64
+    sub r11, r10
+    mov rsi, r11
+    jmp _0count
+    
+_0count:
+    cmp rsi, 1
+    je _result
+    mov r10, 1
+    sub rsi, r10
+    shl rdx, 1
+    mov rdi, rdx    ;restore new value of mask
+    and rdi, rax
+    cmp rdi, rdx
+    je _non
+    jmp _0count
+    
+_result:
+;   checks if r8 = r9
+    cmp r8, r9
+    je _oui
+    jmp _non
+    
+
+; print non
+_non:
+; appel printf
+	lea rdi,[non]
+        mov rax,0
+	call printf wrt ..plt
+    
+    pop rcx
+    pop rbx
+	pop rbp
+	
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret
+
+        
+; print oui    
+_oui:
+; appel printf
+	lea rdi,[oui]
+        mov rax,0
+	call printf wrt ..plt
+	
+    pop rcx
+    pop rbx
+	pop rbp
+	
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret

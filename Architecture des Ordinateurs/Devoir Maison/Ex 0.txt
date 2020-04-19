@@ -1,0 +1,62 @@
+; Programme de calcul de la difference entre deux nombres
+
+
+
+DEFAULT REL
+; fonctions externes pour les entrees/sortie
+extern printf
+extern scanf
+segment .data  ; memoire globale donnees initialisees
+
+prompt1       db "Entrez un entier : ",0
+prompt2       db "Entrez un deuxieme entier : ",0
+formatSortie       db "La différence des deux entiers est : %ld",10,0
+longIntFormat  db "%ld",0
+
+segment .bss  ; memoire globale donnees non itialisees
+entier1  resq 1
+entier2  resq 1
+resultat resq 1
+
+segment .text ; code du programme
+        global  main
+main:  ; fonction appelee par le programme C
+; sauvegarde des registres sur la pile (obligatoirement un nombre impair)
+	push rbp
+	push rbx
+	push r12
+; appel printf
+	lea rdi,[prompt1]
+        mov rax,0
+	call printf wrt ..plt
+; appel scanf
+        lea rdi,[longIntFormat]
+        lea rsi,[entier1]
+        mov rax,0
+	call scanf wrt ..plt
+	mov rbx,[entier1]
+; appel printf
+        lea rdi,[prompt2]
+        mov rax,0
+	call printf wrt ..plt
+; appel scanf
+        lea rdi,[longIntFormat]
+        lea rsi,[entier2]
+        mov rax,0
+	call scanf wrt ..plt
+	mov rcx,[entier2]
+; calcul de la difference et sauvegarde du resultat en memoire
+	sub rbx,rcx
+	mov [resultat],rbx
+; appel printf
+	lea rdi,[formatSortie]
+        mov rsi,[resultat]
+        mov rax,0
+	call printf wrt ..plt
+; restauration des registres
+	pop r12
+	pop rbx
+	pop rbp
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret

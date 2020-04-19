@@ -1,0 +1,76 @@
+; Affichage de message dependant de l'entrée
+
+
+
+
+DEFAULT REL
+; fonctions externes pour les entrees/sortie
+extern printf
+extern scanf
+
+segment .data  ; memoire globale donnees initialisees
+prompt      db "Saisir 0 pour un homme et 1 pour une femme : ",0
+homme       db "Bonjour Monsieur",10,0
+femme       db "Bonjour Madame",10,0
+
+longIntFormat  db "%ld",0
+
+segment .bss  ; memoire globale donnees non itialisees
+bit  resq 1
+
+segment .text ; code du programme
+        global  main
+main:  ; fonction appelee par le programme C
+; sauvegarde des registres sur la pile
+	push rbp
+	push rbx
+	push r12
+	
+; appel printf
+	lea rdi,[prompt]
+        mov rax,0
+	call printf wrt ..plt
+	
+; appel scanf
+        lea rdi,[longIntFormat]
+        lea rsi,[bit]
+        mov rax,0
+	call scanf wrt ..plt
+	mov rbx,[bit]
+
+;comparaison de l'entree
+    mov rcx, 0
+    cmp rbx, rcx
+    je _homme
+    call _femme
+
+; restauration des registres
+	pop r12
+	pop rbx
+	pop rbp
+	
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret
+	
+; appel printf homme
+_homme:
+        lea rdi,[homme]
+        mov rax,0
+	call printf wrt ..plt
+
+; restauration des registres
+	pop r12
+	pop rbx
+	pop rbp
+	
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret
+
+
+_femme:
+        lea rdi, [femme]
+        mov rax, 0
+    call printf wrt ..plt
+    ret

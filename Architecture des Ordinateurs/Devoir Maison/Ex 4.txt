@@ -1,0 +1,71 @@
+; Determine si un nombre est une puissance de deux
+
+
+
+
+DEFAULT REL
+; fonctions externes pour les entrees/sortie
+extern printf
+extern scanf
+
+segment .data  ; memoire globale donnees initialisees
+prompt    db "Saisir un entier :",0
+oui       db "Votre entier EST une puissance de 2",10,0
+non       db "Votre entier n'est PAS une puissance 2",10,0
+longIntFormat  db "%ld",0
+
+segment .bss  ; memoire globale donnees non itialisees
+entier  resq 1
+
+segment .text ; code du programme
+        global  main
+main:  ; fonction appelee par le programme C
+; sauvegarde des registres sur la pile
+	push rbp
+
+; appel printf
+	lea rdi,[prompt]
+        mov rax,0
+	call printf wrt ..plt
+; appel scanf
+        lea rdi,[longIntFormat]
+        lea rsi,[entier]
+        mov rax,0
+	call scanf wrt ..plt
+	mov rax,[entier]
+
+; division recursive de l'entier pour savoir si c'est une puissance de deux
+    mov rbx, 2
+    mov rdx, 0
+    call _divLoop       ; if the the loop isn't broken it will end and ret
+    call _oui
+    
+_divLoop:
+    div rbx
+    cmp rdx, 0  
+    jne _non        ; breaks the loop and print no if rem is found 
+    cmp rax, 1
+    jne _divLoop
+	ret
+	
+_oui:
+	lea rdi,[oui]
+        mov rax,0
+	call printf wrt ..plt
+; restauration des registres
+
+	pop rbp
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret
+
+_non:
+	lea rdi,[non]
+        mov rax,0
+	call printf wrt ..plt
+; restauration des registres
+
+	pop rbp
+; envoi de 0 au programme C
+        mov     rax, 0            
+        ret

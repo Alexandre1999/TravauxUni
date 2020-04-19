@@ -1,0 +1,64 @@
+; Affiche un tableau à l'envers
+
+
+
+
+
+DEFAULT REL
+; external functions for inputs/outputs printf and scanf/printf
+extern printf, fflush
+extern scanf
+
+section .data
+    prompt      db "Entrez un entier : ",0
+    longIntFormat  db " %ld",0
+
+
+section .bss
+    entier resq 10              ; array of 10 integers
+
+
+global _start
+section .text
+
+_start:
+    and rsp, -16                ; Align stack to 16
+
+    mov rbx, 0                  ; initialise counter
+
+; fills the array with user input
+_getLoop:
+; call printf
+    lea rdi,[prompt]
+    mov rax,0
+    call printf wrt ..plt
+
+; call scanf
+    lea rdi,[longIntFormat]
+    lea rsi, [entier + rbx * 8]    ; array + Index
+    mov rax,0
+    call scanf wrt ..plt
+    inc rbx                     ; inc. Index/counter
+    cmp rbx, 10
+    jl _getLoop                 ; While counter is less than 10 (size of array)
+
+    mov rbx, 9                  ; counter set to 10
+
+; print the array in reverse using the counter as Index
+_printLoop:
+
+; call printf
+    lea rdi,[longIntFormat]
+    mov rsi, [entier + rbx*8]   ; rdi = [array + Index]
+    mov rax,0
+    call printf wrt ..plt
+    dec rbx
+    cmp rbx, 0                  ; compare counter with 0
+    jge _printLoop
+
+    xor edi, edi                ; RDI=0: all streams
+    call fflush  wrt ..plt
+
+    mov rax,60                  ; SYS_EXIT
+    mov rdi,0                   ; Exitcode: RDI=0
+    syscall                     ; Call Linux64

@@ -2,8 +2,8 @@
 
 //Connection variables
 $dsn = "localhost";		//server name
-$username = "root";			//mysql username
-$password = "Purpledream7";			//mysql password
+$username = "";			//mysql username
+$password = "";			//mysql password
 //Database Name
 $dbn = "2019_projet7_participations";				//mysql database name
 
